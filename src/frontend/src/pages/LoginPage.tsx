@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,17 +13,15 @@ import { FcGoogle } from "react-icons/fc";
 
 export function LoginPage() {
   const { login, isInitializing, isLoggingIn } = useInternetIdentity();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const disabled = isInitializing || isLoggingIn;
 
-  const handleLogin = async (provider?: "google") => {
+  const handleLogin = async (opts?: any) => {
+    setErrorMessage(null);
     try {
-      if (provider === "google") {
-        await login({ provider: "google" });
-      } else {
-        await login();
-      }
-    } catch (err) {
-      console.error("Erro na autenticação:", err);
+      await login(opts);
+    } catch (err: any) {
+      setErrorMessage(err?.message || JSON.stringify(err) || "Falha ao iniciar autenticação");
     }
   };
 
@@ -47,12 +46,18 @@ export function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
+            {errorMessage && (
+              <div className="rounded-lg bg-destructive/15 p-3 text-xs text-destructive">
+                {errorMessage}
+              </div>
+            )}
+
             <Button
               data-ocid="google_login_button"
               variant="outline"
               className="w-full rounded-xl py-6 text-base font-semibold"
               disabled={disabled}
-              onClick={() => handleLogin("google")}
+              onClick={() => handleLogin({ provider: "google" })}
             >
               {isLoggingIn ? (
                 <Loader2 className="size-5 animate-spin" />
