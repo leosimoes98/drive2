@@ -41,26 +41,28 @@ jobs:
 
       - name: Configure Android WebView Settings
         run: |
-          MAIN_DIR=$(find src/frontend/android/app/src/main/java -type d -name "app" 2>/dev/null | head -n 1)
-          if [ -d "$MAIN_DIR" ]; then
-            cat << 'EOF' > "$MAIN_DIR/MainActivity.java"
-package br.com.drive2.app;
+          python3 -c "
+          import os, glob
+          files = glob.glob('src/frontend/android/**/MainActivity.java', recursive=True)
+          if files:
+              content = '''package br.com.drive2.app;
 
-import android.os.Bundle;
-import android.webkit.WebSettings;
-import com.getcapacitor.BridgeActivity;
+          import android.os.Bundle;
+          import android.webkit.WebSettings;
+          import com.getcapacitor.BridgeActivity;
 
-public class MainActivity extends BridgeActivity {
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        WebSettings webSettings = this.bridge.getWebView().getSettings();
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setSupportMultipleWindows(true);
-    }
-}
-EOF
-          fi
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  WebSettings webSettings = this.bridge.getWebView().getSettings();
+                  webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+                  webSettings.setSupportMultipleWindows(true);
+              }
+          }'''
+              with open(files[0], 'w') as f:
+                  f.write(content)
+          "
 
       - name: Build Android Debug APK
         run: |
