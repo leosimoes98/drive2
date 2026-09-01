@@ -8,38 +8,52 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '21'
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 8
+
       - name: Install Monorepo Dependencies
         run: pnpm install
+
       - name: Build Web App
         run: |
           cd src/frontend
           pnpm build
+
       - name: Capacitor Sync
         run: |
           cd src/frontend
           npx cap add android || true
           npx cap sync android
+
+      - name: Configure Android WebView Settings
+        run: |
+          MAIN_ACTIVITY=$(find src/frontend/android/ -name "MainActivity.java" 2>/dev/null | head -n 1)
+          if [ -n "$MAIN_ACTIVITY" ]; then
+            sed -i '/import com.getcapacitor.BridgeActivity;/a import android.os.Bundle;\nimport android.webkit.WebSettings;' "$MAIN_ACTIVITY"
+            sed -i '/public class MainActivity extends BridgeActivity {/a \    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        WebSettings webSettings = this.bridge.getWebView().getSettings();\n        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);\n        webSettings.setSupportMultipleWindows(true);\n    }' "$MAIN_ACTIVITY"
+          fi
+
       - name: Build Android Debug APK
         run: |
           cd src/frontend/android
           ./gradlew assembleDebug
+
       - name: Upload APK Package
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: src/frontend/android/app/build/outputs/apk/debug/app-debug.apk
-
-
