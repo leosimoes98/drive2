@@ -14,6 +14,18 @@ export function LoginPage() {
   const { login, isInitializing, isLoggingIn } = useInternetIdentity();
   const disabled = isInitializing || isLoggingIn;
 
+  const handleLogin = async (provider?: "google") => {
+    try {
+      if (provider === "google") {
+        await login({ provider: "google" });
+      } else {
+        await login();
+      }
+    } catch (err) {
+      console.error("Erro na autenticação:", err);
+    }
+  };
+
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-md">
@@ -40,7 +52,7 @@ export function LoginPage() {
               variant="outline"
               className="w-full rounded-xl py-6 text-base font-semibold"
               disabled={disabled}
-              onClick={() => login({ provider: "google" })}
+              onClick={() => handleLogin("google")}
             >
               {isLoggingIn ? (
                 <Loader2 className="size-5 animate-spin" />
@@ -61,7 +73,7 @@ export function LoginPage() {
               variant="ghost"
               className="w-full rounded-xl py-5 text-sm"
               disabled={disabled}
-              onClick={() => login()}
+              onClick={() => handleLogin()}
             >
               Entrar com Internet Identity
             </Button>
