@@ -1,0 +1,17 @@
+{
+  "overview": "Plataforma de corridas Drive2: clientes chamam corridas com valor estimado, motoristas aceitam ou recusam e o administrador acompanha a taxa de 5%.",
+  "features": [
+    "Chamar corridas e ver o valor estimado antes de confirmar",
+    "Escolher pagamento por cartão ou dinheiro",
+    "Motoristas aceitam ou recusam corridas",
+    "Aprovação de veículos pelo administrador",
+    "Painel com taxa de 5% por corrida"
+  ],
+  "category": "ride-hailing",
+  "tags": [
+    "transporte",
+    "corridas",
+    "mobilidade"
+  ],
+  "last_updated": "2026-08-31T21:40:18.586Z"
+}
