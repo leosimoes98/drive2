@@ -18,7 +18,11 @@ const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <InternetIdentityProvider>
+    <InternetIdentityProvider
+      authClientOptions={{
+        identityProvider: "https://identity.ic0.app",
+      }}
+    >
       <App />
     </InternetIdentityProvider>
   </QueryClientProvider>,
