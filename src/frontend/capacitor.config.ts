@@ -5,7 +5,16 @@ const config: CapacitorConfig = {
   appName: 'Drive2',
   webDir: 'dist',
   bundledWebRuntime: false,
-  server: { androidScheme: 'https' },
+  server: {
+    androidScheme: 'https',
+    cleartext: true,
+    allowNavigation: [
+      '*.google.com',
+      '*.accounts.google.com',
+      '*.identity.ic0.app',
+      '*.ic0.app'
+    ]
+  }
 };
 
 export default config;
