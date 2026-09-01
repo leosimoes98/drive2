@@ -41,10 +41,25 @@ jobs:
 
       - name: Configure Android WebView Settings
         run: |
-          MAIN_ACTIVITY=$(find src/frontend/android/ -name "MainActivity.java" 2>/dev/null | head -n 1)
-          if [ -n "$MAIN_ACTIVITY" ]; then
-            sed -i '/import com.getcapacitor.BridgeActivity;/a import android.os.Bundle;\nimport android.webkit.WebSettings;' "$MAIN_ACTIVITY"
-            sed -i '/public class MainActivity extends BridgeActivity {/a \    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        WebSettings webSettings = this.bridge.getWebView().getSettings();\n        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);\n        webSettings.setSupportMultipleWindows(true);\n    }' "$MAIN_ACTIVITY"
+          MAIN_DIR=$(find src/frontend/android/app/src/main/java -type d -name "app" 2>/dev/null | head -n 1)
+          if [ -d "$MAIN_DIR" ]; then
+            cat << 'EOF' > "$MAIN_DIR/MainActivity.java"
+package br.com.drive2.app;
+
+import android.os.Bundle;
+import android.webkit.WebSettings;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        WebSettings webSettings = this.bridge.getWebView().getSettings();
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setSupportMultipleWindows(true);
+    }
+}
+EOF
           fi
 
       - name: Build Android Debug APK
