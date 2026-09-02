@@ -82,7 +82,9 @@ jobs:
                           popupSettings.setJavaScriptEnabled(true);
                           popupSettings.setDomStorageEnabled(true);
                           popupSettings.setDatabaseEnabled(true);
+                          popupSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
+                          CookieManager.getInstance().setAcceptCookie(true);
                           CookieManager.getInstance().setAcceptThirdPartyCookies(popupWebView, true);
 
                           Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
@@ -93,7 +95,6 @@ jobs:
                               @Override
                               public void onCloseWindow(WebView window) {
                                   dialog.dismiss();
-                                  webView.reload();
                               }
                           });
 
@@ -101,11 +102,16 @@ jobs:
                               @Override
                               public void onPageFinished(WebView v, String url) {
                                   super.onPageFinished(v, url);
-                                  if (url != null) {
-                                      if (url.contains("/manage") || url.contains("success") || url.contains("localhost")) {
-                                          dialog.dismiss();
-                                          webView.reload();
-                                      }
+                                  // Se terminar no painel /manage, aguarda a mensagem trafegar e fecha
+                                  if (url != null && (url.contains("/manage") || url.contains("success"))) {
+                                      v.postDelayed(new Runnable() {
+                                          @Override
+                                          public void run() {
+                                              if (dialog.isShowing()) {
+                                                  dialog.dismiss();
+                                              }
+                                          }
+                                      }, 2000);
                                   }
                               }
                           });
