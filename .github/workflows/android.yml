@@ -56,6 +56,7 @@ jobs:
           import android.view.View;
           import android.view.ViewGroup;
           import android.webkit.CookieManager;
+          import android.webkit.JavascriptInterface;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
@@ -98,18 +99,16 @@ jobs:
                           layout.setOrientation(LinearLayout.VERTICAL);
                           layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-                          // Barra com botao para fechar e voltar
                           Button closeBtn = new Button(MainActivity.this);
-                          closeBtn.setText("✕ Concluir Login e Voltar ao App");
+                          closeBtn.setText("✕ Cancelar / Fechar");
                           closeBtn.setTextColor(Color.WHITE);
-                          closeBtn.setBackgroundColor(Color.parseColor("#15803d")); // Verde
-                          closeBtn.setPadding(20, 30, 20, 30);
+                          closeBtn.setBackgroundColor(Color.parseColor("#334155"));
+                          closeBtn.setPadding(20, 25, 20, 25);
                           closeBtn.setGravity(Gravity.CENTER);
                           closeBtn.setOnClickListener(new View.OnClickListener() {
                               @Override
                               public void onClick(View v) {
                                   dialog.dismiss();
-                                  mainWebView.reload();
                               }
                           });
 
@@ -119,11 +118,27 @@ jobs:
                           dialog.setContentView(layout);
                           dialog.show();
 
+                          // Ponte nativa para encaminhar mensagens do popup para a janela principal
+                          popupWebView.addJavascriptInterface(new Object() {
+                              @JavascriptInterface
+                              public void relayMessage(final String data) {
+                                  MainActivity.this.runOnUiThread(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                          mainWebView.evaluateJavascript(
+                                              "window.postMessage(" + data + ", '*');",
+                                              null
+                                          );
+                                          dialog.dismiss();
+                                      }
+                                  });
+                              }
+                          }, "AndroidAuthBridge");
+
                           popupWebView.setWebChromeClient(new WebChromeClient() {
                               @Override
                               public void onCloseWindow(WebView window) {
                                   dialog.dismiss();
-                                  mainWebView.reload();
                               }
                           });
 
@@ -131,18 +146,19 @@ jobs:
                               @Override
                               public void onPageFinished(WebView v, String url) {
                                   super.onPageFinished(v, url);
-                                  // Se detectar que chegou na tela de boas-vindas do id.ai, fecha sozinho apos 2 segundos
-                                  if (url != null && url.contains("/manage")) {
-                                      v.postDelayed(new Runnable() {
-                                          @Override
-                                          public void run() {
-                                              if (dialog.isShowing()) {
-                                                  dialog.dismiss();
-                                                  mainWebView.reload();
-                                              }
-                                          }
-                                      }, 2000);
-                                  }
+                                  // Injeta interceptor de postMessage para capturar o payload da delegacao
+                                  String injector = 
+                                      "(function() {" +
+                                      "  if (window._relayHooked) return;" +
+                                      "  window._relayHooked = true;" +
+                                      "  var origPost = window.opener ? window.opener.postMessage : null;" +
+                                      "  window.addEventListener('message', function(e) {" +
+                                      "    if (e.data && (e.data.kind === 'authorize-client-success' || typeof e.data === 'object')) {" +
+                                      "      if (window.AndroidAuthBridge) { window.AndroidAuthBridge.relayMessage(JSON.stringify(e.data)); }" +
+                                      "    }" +
+                                      "  });" +
+                                      "})();";
+                                  v.evaluateJavascript(injector, null);
                               }
                           });
 
