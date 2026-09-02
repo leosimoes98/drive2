@@ -49,22 +49,27 @@ jobs:
               java_code = """package br.com.drive2.app;
 
           import android.app.Dialog;
+          import android.graphics.Color;
           import android.os.Bundle;
           import android.os.Message;
+          import android.view.Gravity;
+          import android.view.View;
           import android.view.ViewGroup;
           import android.webkit.CookieManager;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
+          import android.widget.Button;
+          import android.widget.LinearLayout;
           import com.getcapacitor.BridgeActivity;
 
           public class MainActivity extends BridgeActivity {
               @Override
               public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-                  WebView webView = this.bridge.getWebView();
-                  WebSettings webSettings = webView.getSettings();
+                  final WebView mainWebView = this.bridge.getWebView();
+                  WebSettings webSettings = mainWebView.getSettings();
                   webSettings.setJavaScriptEnabled(true);
                   webSettings.setDomStorageEnabled(true);
                   webSettings.setDatabaseEnabled(true);
@@ -72,12 +77,12 @@ jobs:
                   webSettings.setSupportMultipleWindows(true);
 
                   CookieManager.getInstance().setAcceptCookie(true);
-                  CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+                  CookieManager.getInstance().setAcceptThirdPartyCookies(mainWebView, true);
 
-                  webView.setWebChromeClient(new WebChromeClient() {
+                  mainWebView.setWebChromeClient(new WebChromeClient() {
                       @Override
                       public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
-                          WebView popupWebView = new WebView(MainActivity.this);
+                          final WebView popupWebView = new WebView(MainActivity.this);
                           WebSettings popupSettings = popupWebView.getSettings();
                           popupSettings.setJavaScriptEnabled(true);
                           popupSettings.setDomStorageEnabled(true);
@@ -87,14 +92,38 @@ jobs:
                           CookieManager.getInstance().setAcceptCookie(true);
                           CookieManager.getInstance().setAcceptThirdPartyCookies(popupWebView, true);
 
-                          Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-                          dialog.setContentView(popupWebView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                          final Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+
+                          LinearLayout layout = new LinearLayout(MainActivity.this);
+                          layout.setOrientation(LinearLayout.VERTICAL);
+                          layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                          // Barra com botao para fechar e voltar
+                          Button closeBtn = new Button(MainActivity.this);
+                          closeBtn.setText("✕ Concluir Login e Voltar ao App");
+                          closeBtn.setTextColor(Color.WHITE);
+                          closeBtn.setBackgroundColor(Color.parseColor("#15803d")); // Verde
+                          closeBtn.setPadding(20, 30, 20, 30);
+                          closeBtn.setGravity(Gravity.CENTER);
+                          closeBtn.setOnClickListener(new View.OnClickListener() {
+                              @Override
+                              public void onClick(View v) {
+                                  dialog.dismiss();
+                                  mainWebView.reload();
+                              }
+                          });
+
+                          layout.addView(closeBtn, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                          layout.addView(popupWebView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                          dialog.setContentView(layout);
                           dialog.show();
 
                           popupWebView.setWebChromeClient(new WebChromeClient() {
                               @Override
                               public void onCloseWindow(WebView window) {
                                   dialog.dismiss();
+                                  mainWebView.reload();
                               }
                           });
 
@@ -102,25 +131,17 @@ jobs:
                               @Override
                               public void onPageFinished(WebView v, String url) {
                                   super.onPageFinished(v, url);
-                                  if (url != null && (url.contains("/manage") || url.contains("id.ai"))) {
-                                      // Captura as chaves e delegações do localStorage do popup e replica no WebView principal
-                                      v.evaluateJavascript(
-                                          "(function() { var data = {}; for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); data[k] = localStorage.getItem(k); } return JSON.stringify(data); })();",
-                                          value -> {
-                                              if (value != null && !value.equals("null") && !value.equals("{}")) {
-                                                  String script = "var items = " + value + "; for (var k in items) { localStorage.setItem(k, items[k]); } window.dispatchEvent(new Event('storage'));";
-                                                  view.evaluateJavascript(script, null);
+                                  // Se detectar que chegou na tela de boas-vindas do id.ai, fecha sozinho apos 2 segundos
+                                  if (url != null && url.contains("/manage")) {
+                                      v.postDelayed(new Runnable() {
+                                          @Override
+                                          public void run() {
+                                              if (dialog.isShowing()) {
+                                                  dialog.dismiss();
+                                                  mainWebView.reload();
                                               }
                                           }
-                                      );
-
-                                      // Fecha o Dialog de login e dá foco ao app
-                                      v.postDelayed(() -> {
-                                          if (dialog.isShowing()) {
-                                              dialog.dismiss();
-                                              view.evaluateJavascript("window.location.reload();", null);
-                                          }
-                                      }, 1000);
+                                      }, 2000);
                                   }
                               }
                           });
