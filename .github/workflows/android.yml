@@ -102,8 +102,13 @@ jobs:
                               @Override
                               public void onPageFinished(WebView v, String url) {
                                   super.onPageFinished(v, url);
-                                  // Se terminar no painel /manage, aguarda a mensagem trafegar e fecha
-                                  if (url != null && (url.contains("/manage") || url.contains("success"))) {
+                                  // Se o id.ai redirecionou para o painel de gerenciamento,
+                                  // aciona a rotina para repassar a sessao ao app principal e fecha
+                                  if (url != null && url.contains("/manage")) {
+                                      v.evaluateJavascript(
+                                          "if (window.opener) { window.opener.postMessage({ kind: 'authorize-client-success' }, '*'); }",
+                                          null
+                                      );
                                       v.postDelayed(new Runnable() {
                                           @Override
                                           public void run() {
@@ -111,7 +116,7 @@ jobs:
                                                   dialog.dismiss();
                                               }
                                           }
-                                      }, 2000);
+                                      }, 1500);
                                   }
                               }
                           });
