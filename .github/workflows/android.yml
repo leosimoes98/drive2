@@ -48,12 +48,15 @@ jobs:
           if files:
               java_code = """package br.com.drive2.app;
 
+          import android.app.Dialog;
           import android.os.Bundle;
           import android.os.Message;
+          import android.view.ViewGroup;
           import android.webkit.CookieManager;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
+          import android.webkit.WebViewClient;
           import com.getcapacitor.BridgeActivity;
 
           public class MainActivity extends BridgeActivity {
@@ -74,24 +77,55 @@ jobs:
                   webView.setWebChromeClient(new WebChromeClient() {
                       @Override
                       public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
-                          // Redireciona a solicitacao de abertura de popup diretamente para a propria tela principal
-                          WebView.HitTestResult result = view.getHitTestResult();
-                          String data = result.getExtra();
-                          if (data != null) {
-                              view.loadUrl(data);
-                              return false;
-                          }
-                          WebView transportWebView = new WebView(view.getContext());
-                          transportWebView.setWebChromeClient(new WebChromeClient() {
+                          WebView popupWebView = new WebView(MainActivity.this);
+                          WebSettings popupSettings = popupWebView.getSettings();
+                          popupSettings.setJavaScriptEnabled(true);
+                          popupSettings.setDomStorageEnabled(true);
+                          popupSettings.setDatabaseEnabled(true);
+                          popupSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+
+                          CookieManager.getInstance().setAcceptCookie(true);
+                          CookieManager.getInstance().setAcceptThirdPartyCookies(popupWebView, true);
+
+                          Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                          dialog.setContentView(popupWebView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                          dialog.show();
+
+                          popupWebView.setWebChromeClient(new WebChromeClient() {
                               @Override
-                              public void onProgressChanged(WebView v, int newProgress) {
-                                  if (v.getUrl() != null && !v.getUrl().isEmpty()) {
-                                      view.loadUrl(v.getUrl());
-                                      v.stopLoading();
+                              public void onCloseWindow(WebView window) {
+                                  dialog.dismiss();
+                              }
+                          });
+
+                          popupWebView.setWebViewClient(new WebViewClient() {
+                              @Override
+                              public void onPageFinished(WebView v, String url) {
+                                  super.onPageFinished(v, url);
+                                  if (url != null && (url.contains("/manage") || url.contains("id.ai"))) {
+                                      // Captura as chaves e delegações do localStorage do popup e replica no WebView principal
+                                      v.evaluateJavascript(
+                                          "(function() { var data = {}; for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); data[k] = localStorage.getItem(k); } return JSON.stringify(data); })();",
+                                          value -> {
+                                              if (value != null && !value.equals("null") && !value.equals("{}")) {
+                                                  String script = "var items = " + value + "; for (var k in items) { localStorage.setItem(k, items[k]); } window.dispatchEvent(new Event('storage'));";
+                                                  view.evaluateJavascript(script, null);
+                                              }
+                                          }
+                                      );
+
+                                      // Fecha o Dialog de login e dá foco ao app
+                                      v.postDelayed(() -> {
+                                          if (dialog.isShowing()) {
+                                              dialog.dismiss();
+                                              view.evaluateJavascript("window.location.reload();", null);
+                                          }
+                                      }, 1000);
                                   }
                               }
                           });
-                          ((WebView.WebViewTransport) resultMsg.obj).setWebView(transportWebView);
+
+                          ((WebView.WebViewTransport) resultMsg.obj).setWebView(popupWebView);
                           resultMsg.sendToTarget();
                           return true;
                       }
