@@ -41,10 +41,86 @@ jobs:
 
       - name: Configure Android WebView Settings
         run: |
-          MAIN_FILE=$(find src/frontend/android/app/src/main/java -name "MainActivity.java" 2>/dev/null | head -n 1)
-          if [ -n "$MAIN_FILE" ]; then
-            echo "cGFja2FnZSBici5jb20uZHJpdmUyLmFwcDsKCmltcG9ydCBhbmRyb2lkLmFwcC5EaWFsb2c7CmltcG9ydCBhbmRyb2lkLm9zLkJ1bmRsZTsKaW1wb3J0IGFuZHJvaWQub3MuTWVzc2FnZTsKaW1wb3J0IGFuZHJvaWQudmlldy5WaWV3R3JvdXA7CmltcG9ydCBhbmRyb2lkLndlYmtpdC5Db29raWVNYW5hZ2VyOwppbXBvcnQgYW5kcm9pZC53ZWJraXQuV2ViQ2hyb21lQ2xpZW50OwppbXBvcnQgYW5kcm9pZC53ZWJraXQuV2ViU2V0dGluZ3M7CmltcG9ydCBhbmRyb2lkLndlYmtpdC5XZWJWaWV3OwppbXBvcnQgYW5kcm9pZC53ZWJraXQuV2ViVmlld0NsaWVudDsKaW1wb3J0IGNvbS5nZXRjYXBhY2l0b3IuQnJpZGdlQWN0aXZpdHk7CgpwdWJsaWMgY2xhc3MgTWFpbkFjdGl2aXR5IGV4dGVuZHMgQnJpZGdlQWN0aXZpdHkgewogICAgQE92ZXJyaWRlCiAgICBwdWJsaWMgdm9pZCBvbkNyZWF0ZShCdW5kbGUgc2F2ZWRJbnN0YW5jZVN0YXRlKSB7CiAgICAgICAgc3VwZXIub25DcmVhdGUoc2F2ZWRJbnN0YW5jZVN0YXRlKTsKICAgICAgICBXZWJWaWV3IHdlYlZpZXcgPSB0aGlzLmJyaWRnZS5nZXRXZWJWaWV3KCk7CiAgICAgICAgV2ViU2V0dGluZ3Mgd2ViU2V0dGluZ3MgPSB3ZWJWaWV3LmdldFNldHRpbmdzKCk7CiAgICAgICAgd2ViU2V0dGluZ3Muc2V0SmF2YVNjcmlwdEVuYWJsZWQodHJ1ZSk7CiAgICAgICAgd2ViU2V0dGluZ3Muc2V0RG9tU3RvcmFnZUVuYWJsZWQodHJ1ZSk7CiAgICAgICAgd2ViU2V0dGluZ3Muc2V0RGF0YWJhc2VFbmFibGVkKHRydWUpOwogICAgICAgIHdlYlNldHRpbmdzLnNldEphdmFTY3JpcHRDYW5PcGVuV2luZG93c0F1dG9tYXRpY2FsbHkodHJ1ZSk7CiAgICAgICAgd2ViU2V0dGluZ3Muc2V0U3VwcG9ydE11bHRpcGxlV2luZG93cyh0cnVlKTsKCiAgICAgICAgQ29va2llTWFuYWdlci5nZXRJbnN0YW5jZSgpLnNldEFjY2VwdENvb2tpZSh0cnVlKTsKICAgICAgICBDb29raWVNYW5hZ2VyLmdldEluc3RhbmNlKCkuc2V0QWNjZXB0VGhpcmRQYXJ0eUNvb2tpZXMod2ViVmlldywgdHJ1ZSk7CgogICAgICAgIHdlYlZpZXcuc2V0V2ViQ2hyb21lQ2xpZW50KG5ldyBXZWJDaHJvbWVDbGllbnQoKSB7CiAgICAgICAgICAgIEBPdmVycmlkZQogICAgICAgICAgICBwdWJsaWMgYm9vbGVhbiBvbkNyZWF0ZVdpbmRvdyhXZWJWaWV3IHZpZXcsIGJvb2xlYW4gaXNEaWFsb2csIGJvb2xlYW4gaXNVc2VyR2VzdHVyZSwgTWVzc2FnZSByZXN1bHRNc2cpIHsKICAgICAgICAgICAgICAgIFdlYlZpZXcgcG9wdXBXZWJWaWV3ID0gbmV3IFdlYlZpZXcoTWFpbkFjdGl2aXR5LnRoaXMpOwogICAgICAgICAgICAgICAgV2ViU2V0dGluZ3MgcG9wdXBTZXR0aW5ncyA9IHBvcHVwV2ViVmlldy5nZXRTZXR0aW5ncygpOwogICAgICAgICAgICAgICAgcG9wdXBTZXR0aW5ncy5zZXRKYXZhU2NyaXB0RW5hYmxlZCh0cnVlKTsKICAgICAgICAgICAgICAgIHBvcHVwU2V0dGluZ3Muc2V0RG9tU3RvcmFnZUVuYWJsZWQodHJ1ZSk7CiAgICAgICAgICAgICAgICBwb3B1cFNldHRpbmdzLnNldERhdGFiYXNlRW5hYmxlZCh0cnVlKTsKCiAgICAgICAgICAgICAgICBDb29raWVNYW5hZ2VyLmdldEluc3RhbmNlKCkuc2V0QWNjZXB0VGhpcmRQYXJ0eUNvb2tpZXMocG9wdXBXZWJWaWV3LCB0cnVlKTsKCiAgICAgICAgICAgICAgICBEaWFsb2cgZGlhbG9nID0gbmV3IERpYWxvZyhNYWluQWN0aXZpdHkudGhpcywgYW5kcm9pZC5SLnN0eWxlLlRoZW1lX0JsYWNrX05vVGl0bGVCYXJfRnVsbHNjcmVlbik7CiAgICAgICAgICAgICAgICBkaWFsb2cuc2V0Q29udGVudFZpZXcocG9wdXBXZWJWaWV3LCBuZXcgVmlld0dyb3VwLkxheW91dFBhcmFtcyhWaWV3R3JvdXAuTGF5b3V0UGFyYW1zLk1BVENIX1BBUkVOVCwgVmlld0dyb3VwLkxheW91dFBhcmFtcy5NQVRDSF9QQVJFTlQpKTsKICAgICAgICAgICAgICAgIGRpYWxvZy5zaG93KCk7CgogICAgICAgICAgICAgICAgcG9wdXBXZWJWaWV3LnNldFdlYkNocm9tZUNsaWVudChuZXcgV2ViQ2hyb21lQ2xpZW50KCkgewogICAgICAgICAgICAgICAgICAgIEBPdmVycmlkZQogICAgICAgICAgICAgICAgICAgIHB1YmxpYyB2b2lkIG9uQ2xvc2VXaW5kb3coV2ViVmlldyB3aW5kb3cpIHsKICAgICAgICAgICAgICAgICAgICAgICAgZGlhbG9nLmRpc21pc3MoKTsKICAgICAgICAgICAgICAgICAgICAgICAgd2ViVmlldy5yZWxvYWQoKTsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB9KTsKCiAgICAgICAgICAgICAgICBwb3B1cFdlYlZpZXcuc2V0V2ViVmlld0NsaWVudChuZXcgV2ViVmlld0NsaWVudCgpIHsKICAgICAgICAgICAgICAgICAgICBBPk92ZXJyaWRlCiAgICAgICAgICAgICAgICAgICAgcHVibGljIHZvaWQgb25QYWdlRmluaXNoZWQoV2ViVmlldyB2LCBTdHJpbmcgdXJsKSB7CiAgICAgICAgICAgICAgICAgICAgICAgIHN1cGVyLm9uUGFnZUZpbmlzaGVkKHYsIHVybCk7CiAgICAgICAgICAgICAgICAgICAgICAgIGlmICh1cmwgIT0gbnVsbCAmJiAodXJsLmNvbnRhaW5zKCIvbWFuYWdlIikgfHwgdXJsLmNvbnRhaW5zKCJzdWNjZXNzIikgfHwgdXJsLmNvbnRhaW5zKCpsb2NhbGhvc3QiKSkpIHsKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRpYWxvZy5kaXNtaXNzKCk7CiAgICAgICAgICAgICAgICAgICAgICAgICAgICB3ZWJWaWV3LnJlbG9hZCgpOwogICAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfSk7CgogICAgICAgICAgICAgICAgKChXZWJWaWV3LldlYlZpZXdUcmFuc3BvcnQpIHJlc3VsdE1zZy5vYmopLnNldFdlYlZpZXcocG9wdXBXZWJWaWV3KTsKICAgICAgICAgICAgICAgIHJlc3VsdE1zZy5zZW5kVG9UYXJnZXQoKTsKICAgICAgICAgICAgICAgIHJldHVybiB0cnVlOwogICAgICAgICAgICB9CiAgICAgICAgfSk7CiAgICB9Cn0=" | base64 -d > "$MAIN_FILE"
-          fi
+          python3 - << 'PYEOF'
+          import glob
+
+          files = glob.glob('src/frontend/android/app/src/main/java/**/MainActivity.java', recursive=True)
+          if files:
+              java_code = """package br.com.drive2.app;
+
+          import android.app.Dialog;
+          import android.os.Bundle;
+          import android.os.Message;
+          import android.view.ViewGroup;
+          import android.webkit.CookieManager;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  WebView webView = this.bridge.getWebView();
+                  WebSettings webSettings = webView.getSettings();
+                  webSettings.setJavaScriptEnabled(true);
+                  webSettings.setDomStorageEnabled(true);
+                  webSettings.setDatabaseEnabled(true);
+                  webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+                  webSettings.setSupportMultipleWindows(true);
+
+                  CookieManager.getInstance().setAcceptCookie(true);
+                  CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+
+                  webView.setWebChromeClient(new WebChromeClient() {
+                      @Override
+                      public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                          WebView popupWebView = new WebView(MainActivity.this);
+                          WebSettings popupSettings = popupWebView.getSettings();
+                          popupSettings.setJavaScriptEnabled(true);
+                          popupSettings.setDomStorageEnabled(true);
+                          popupSettings.setDatabaseEnabled(true);
+
+                          CookieManager.getInstance().setAcceptThirdPartyCookies(popupWebView, true);
+
+                          Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                          dialog.setContentView(popupWebView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                          dialog.show();
+
+                          popupWebView.setWebChromeClient(new WebChromeClient() {
+                              @Override
+                              public void onCloseWindow(WebView window) {
+                                  dialog.dismiss();
+                                  webView.reload();
+                              }
+                          });
+
+                          popupWebView.setWebViewClient(new WebViewClient() {
+                              @Override
+                              public void onPageFinished(WebView v, String url) {
+                                  super.onPageFinished(v, url);
+                                  if (url != null) {
+                                      if (url.contains("/manage") || url.contains("success") || url.contains("localhost")) {
+                                          dialog.dismiss();
+                                          webView.reload();
+                                      }
+                                  }
+                              }
+                          });
+
+                          ((WebView.WebViewTransport) resultMsg.obj).setWebView(popupWebView);
+                          resultMsg.sendToTarget();
+                          return true;
+                      }
+                  });
+              }
+          }
+          """
+              with open(files[0], 'w', encoding='utf-8') as f:
+                  f.write(java_code)
+          PYEOF
 
       - name: Build Android Debug APK
         run: |
