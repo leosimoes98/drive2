@@ -48,15 +48,12 @@ jobs:
           if files:
               java_code = """package br.com.drive2.app;
 
-          import android.app.Dialog;
           import android.os.Bundle;
           import android.os.Message;
-          import android.view.ViewGroup;
           import android.webkit.CookieManager;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
-          import android.webkit.WebViewClient;
           import com.getcapacitor.BridgeActivity;
 
           public class MainActivity extends BridgeActivity {
@@ -77,51 +74,24 @@ jobs:
                   webView.setWebChromeClient(new WebChromeClient() {
                       @Override
                       public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
-                          WebView popupWebView = new WebView(MainActivity.this);
-                          WebSettings popupSettings = popupWebView.getSettings();
-                          popupSettings.setJavaScriptEnabled(true);
-                          popupSettings.setDomStorageEnabled(true);
-                          popupSettings.setDatabaseEnabled(true);
-                          popupSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-
-                          CookieManager.getInstance().setAcceptCookie(true);
-                          CookieManager.getInstance().setAcceptThirdPartyCookies(popupWebView, true);
-
-                          Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-                          dialog.setContentView(popupWebView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                          dialog.show();
-
-                          popupWebView.setWebChromeClient(new WebChromeClient() {
+                          // Redireciona a solicitacao de abertura de popup diretamente para a propria tela principal
+                          WebView.HitTestResult result = view.getHitTestResult();
+                          String data = result.getExtra();
+                          if (data != null) {
+                              view.loadUrl(data);
+                              return false;
+                          }
+                          WebView transportWebView = new WebView(view.getContext());
+                          transportWebView.setWebChromeClient(new WebChromeClient() {
                               @Override
-                              public void onCloseWindow(WebView window) {
-                                  dialog.dismiss();
-                              }
-                          });
-
-                          popupWebView.setWebViewClient(new WebViewClient() {
-                              @Override
-                              public void onPageFinished(WebView v, String url) {
-                                  super.onPageFinished(v, url);
-                                  // Se o id.ai redirecionou para o painel de gerenciamento,
-                                  // aciona a rotina para repassar a sessao ao app principal e fecha
-                                  if (url != null && url.contains("/manage")) {
-                                      v.evaluateJavascript(
-                                          "if (window.opener) { window.opener.postMessage({ kind: 'authorize-client-success' }, '*'); }",
-                                          null
-                                      );
-                                      v.postDelayed(new Runnable() {
-                                          @Override
-                                          public void run() {
-                                              if (dialog.isShowing()) {
-                                                  dialog.dismiss();
-                                              }
-                                          }
-                                      }, 1500);
+                              public void onProgressChanged(WebView v, int newProgress) {
+                                  if (v.getUrl() != null && !v.getUrl().isEmpty()) {
+                                      view.loadUrl(v.getUrl());
+                                      v.stopLoading();
                                   }
                               }
                           });
-
-                          ((WebView.WebViewTransport) resultMsg.obj).setWebView(popupWebView);
+                          ((WebView.WebViewTransport) resultMsg.obj).setWebView(transportWebView);
                           resultMsg.sendToTarget();
                           return true;
                       }
