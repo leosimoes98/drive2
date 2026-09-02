@@ -11,6 +11,8 @@ const config: CapacitorConfig = {
     allowNavigation: [
       '*.google.com',
       '*.accounts.google.com',
+      '*.id.ai',
+      'id.ai',
       '*.identity.ic0.app',
       '*.ic0.app'
     ]
