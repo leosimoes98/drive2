@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,33 +12,7 @@ import { FcGoogle } from "react-icons/fc";
 
 export function LoginPage() {
   const { login, isInitializing, isLoggingIn } = useInternetIdentity();
-  const [status, setStatus] = useState<string | null>(null);
-
-  const handleGoogleLogin = async () => {
-    setStatus("Iniciando login Google...");
-    try {
-      await login({ provider: "google" });
-      setStatus("Aguardando retorno do login...");
-    } catch (err: any) {
-      alert("Erro ao logar: " + (err?.message || JSON.stringify(err)));
-      setStatus("Erro: " + (err?.message || "falha desconhecida"));
-    }
-  };
-
-  const handleIILogin = async () => {
-    setStatus("Iniciando Internet Identity...");
-    try {
-      await login();
-      setStatus("Aguardando retorno do login...");
-    } catch (err: any) {
-      alert("Erro ao logar: " + (err?.message || JSON.stringify(err)));
-      setStatus("Erro: " + (err?.message || "falha desconhecida"));
-    }
-  };
-
-  const handleOpenBrowserTest = () => {
-    window.location.href = "https://identity.ic0.app";
-  };
+  const disabled = isInitializing || isLoggingIn;
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-background px-4 py-10">
@@ -62,18 +35,12 @@ export function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {status && (
-              <div className="rounded-lg bg-blue-500/15 p-2 text-center text-xs font-semibold text-blue-600">
-                {status}
-              </div>
-            )}
-
             <Button
               data-ocid="google_login_button"
               variant="outline"
               className="w-full rounded-xl py-6 text-base font-semibold"
-              disabled={isInitializing || isLoggingIn}
-              onClick={handleGoogleLogin}
+              disabled={disabled}
+              onClick={() => login({ provider: "google" })}
             >
               {isLoggingIn ? (
                 <Loader2 className="size-5 animate-spin" />
@@ -93,18 +60,10 @@ export function LoginPage() {
               data-ocid="ii_login_button"
               variant="ghost"
               className="w-full rounded-xl py-5 text-sm"
-              disabled={isInitializing || isLoggingIn}
-              onClick={handleIILogin}
+              disabled={disabled}
+              onClick={() => login()}
             >
               Entrar com Internet Identity
-            </Button>
-
-            <Button
-              variant="secondary"
-              className="mt-2 w-full text-xs"
-              onClick={handleOpenBrowserTest}
-            >
-              Testar Navegação Direta (Abrir Identity)
             </Button>
           </CardContent>
         </Card>
