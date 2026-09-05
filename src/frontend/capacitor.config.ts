@@ -6,6 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {
+    url: 'SUA_URL_AQUI',
     androidScheme: 'https',
     cleartext: true,
     allowNavigation: [
@@ -14,7 +15,9 @@ const config: CapacitorConfig = {
       '*.id.ai',
       'id.ai',
       '*.identity.ic0.app',
-      '*.ic0.app'
+      '*.ic0.app',
+      '*.caffeine.ai',
+      '*.icp0.io'
     ]
   }
 };
