@@ -1,4 +1,4 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+Import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'br.com.drive2.app',
@@ -6,7 +6,6 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {
-    url: 'SUA_URL_AQUI',
     androidScheme: 'https',
     cleartext: true,
     allowNavigation: [
@@ -15,9 +14,7 @@ const config: CapacitorConfig = {
       '*.id.ai',
       'id.ai',
       '*.identity.ic0.app',
-      '*.ic0.app',
-      '*.caffeine.ai',
-      '*.icp0.io'
+      '*.ic0.app'
     ]
   }
 };
